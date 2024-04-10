@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Gadio高维空间定位系统</title>
+    <style>
+
+        /* 普通状态的颜色 */
+        a.custom-link {
+            color: #ffffff; /* 这里可以设置为您想要的任何颜色 */
+            text-decoration: none; /* 可选，移除下划线 */
+        }
+
+        /* 鼠标悬浮时的颜色 */
+        a.custom-link:hover {
+            color: #b62b2b; /* 悬浮时的颜色 */
+        }
+
+        /* 鼠标点击（激活）时的颜色 */
+        a.custom-link:active {
+            color: #004085; /* 点击时的颜色 */
+        }
+
+        /* 访问过的链接颜色 */
+        a.custom-link:visited {
+            color: #bec4ff; /* 访问过后的颜色 */
+        }
+
+
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #333;
+            color: white;
+            padding: 2rem;
+        }
+        h1 {
+    text-align: center;
+    margin-bottom: 0.5rem; /* 减少了与下一个元素的距离 */
+        }
+
+        h2 {
+            text-align: center;
+            font-size: smaller; /* 更小的字号 */
+            margin-top: 0; /* 减少了与上一个元素的距离 */
+            color: gray; /* 设置字体颜色为灰色 */
+        }
+
+        h2 a {
+            color: gray; /* 设置链接的颜色为灰色 */
+            text-decoration: none; /* 去掉下划线 */
+        }
+
+        h2 a:hover {
+            text-decoration: underline; /* 鼠标悬停时添加下划线 */
+        }
+        form {
+            max-width: 300px;
+            margin: 0 auto;
+        }
+        input[type="text"],
+        input[type="number"],
+        input[type="submit"] {
+            width: 100%;
+            padding: 0.5rem;
+            margin-bottom: 1rem;
+            border: none;
+            border-bottom: 2px solid #555;
+            background-color: transparent;
+            color: white;
+            outline: none;
+        }
+        input[type="submit"] {
+            cursor: pointer;
+            background-color: #555;
+            color: white;
+            border-radius: 2rem;
+            padding: 0.5rem 1rem;
+            transition: background-color 0.3s ease;
+        }
+        input[type="submit"]:hover {
+            background-color: #777;
+        }
+        label {
+            margin-bottom: 0.5rem;
+            display: block;
+            
+        }
+
+        .results {
+            max-width: 600px;
+            margin: 1rem auto;
+            padding: 1rem;
+            background-color: #444;
+            border-radius: 10px;
+        }
+
+    </style>
+</head>
+<body>
+    <h1>Gadio高维空间模糊定位系统v0.2</h1>
+    <h2><a href="https://www.gcores.com/users/177246/talks" target="_blank">by YQBelmont贲</a></h2> 
+
+    <form id="searchForm">
+        <label for="query">描述你记忆中的电台片段:</label>
+        <input type="text" id="query" name="query" required maxlength="200">
+        
+        <label for="n_results">想看到几个搜索结果:</label>
+        <input type="number" id="n_results" name="n_results" value="2" min="1" max="10" required>
+        
+        <input type="submit" value="Submit">
+    </form>
+
+    <div class="results" id="results"></div>
+
+    <script>
+        document.getElementById('searchForm').addEventListener('submit', function(event) {
+            // 阻止表单的默认提交行为
+            event.preventDefault();
+
+            var query = document.getElementById('query').value;
+            var nResults = document.getElementById('n_results').value;
+
+            // 使用正确的API端点和POST方法
+            var apiEndpoint = 'https://1wj7134184.iok.la/Gquery'; // 确保端口号和路由与你的Flask应用匹配
+
+            fetch(apiEndpoint, {
+                method: 'POST', // 使用POST方法
+                headers: {
+                    'Content-Type': 'application/json', // 设置请求头，告诉服务器我们发送的是JSON
+                },
+                body: JSON.stringify({query_text: query, n_results: nResults}) // 将数据转换为JSON字符串
+            })
+            .then(response => response.json()) // 直接解析为JSON
+            .then(data => displayResults(data))
+            .catch(error => console.error('Error:', error));
+        });
+
+        function displayResults(data) {
+            var resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = ''; // 清空之前的结果
+
+            // 确保数据格式正确
+            if(Array.isArray(data)) {
+                data.forEach(item => {
+                    var resultHTML = `
+                        <div>
+                            <h3>${item.title}</h3>
+                            <p>${item.text}</p>
+                            <a href="${item.url}" target="_blank" class="custom-link">点击直达节目</a>
+                            <p>内容开始时间点: ${item.start_time}</p>
+                        </div>
+                    `;
+                    resultsDiv.innerHTML += resultHTML;
+                });
+            } else {
+                resultsDiv.innerHTML = '<p>Received data is not in expected format.</p>';
+            }
+        }
+    </script>
+</body>
+</html>
